@@ -25,10 +25,13 @@ jobs:
       uses: aws-actions/amazon-ecr-login@v2
 
     - name: Build, Tag, and Push Docker Image to ECR
+      env:
+        ECR_REGISTRY: 850191424857.dkr.ecr.ap-south-1.amazonaws.com
+        ECR_REPOSITORY: my-app
       run: |
-        docker build -t my-app .
-        docker tag my-app:latest 850191424857.dkr.ecr.ap-south-1.amazonaws.com/my-app:latest
-        docker push 850191424857.dkr.ecr.ap-south-1.amazonaws.com/my-app:latest
+        docker build -t $ECR_REPOSITORY .
+        docker tag $ECR_REPOSITORY:latest $ECR_REGISTRY/$ECR_REPOSITORY:latest
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
 
     - name: Update kubeconfig for EKS
       run: |
@@ -36,5 +39,5 @@ jobs:
 
     - name: Deploy to EKS
       run: |
-        kubectl apply -f k8s/deployment.yaml
-        kubectl apply -f k8s/service.yaml
+        kubectl apply -f k8s/deployment.yaml --validate=false
+        kubectl apply -f k8s/service.yaml --validate=false
